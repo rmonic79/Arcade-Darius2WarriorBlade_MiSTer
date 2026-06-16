@@ -1,0 +1,85 @@
+db
+greybox_tmp
+incremental_db
+output_files
+simulation
+hc_output
+scaler
+hps_isw_handoff
+vip
+*_sim
+.qsys_edit
+PLLJ_PLLSPE_INFO.txt
+*.bak
+*.orig
+*.rej
+*.qdf
+*.rpt
+*.smsg
+*.summary
+*.done
+*.jdi
+*.pin
+*.sof
+*.qws
+*.ppf
+*.ddb
+build_id.v
+c5_pin_model_dump.txt
+*.sopcinfo
+*.csv
+*.f
+*.cmp
+*.sip
+*.spd
+*.bsf
+*~
+*.xml
+*_netlist
+*.cdf
+**/.DS_Store
+
+# Simulation artifacts (large files)
+*.vcd
+*.wlf
+*.vstf
+sim/transcript
+sim/**/transcript
+sim/**/*.log
+sim/**/*.memh
+sim/**/work/
+sim/tb_vram_arbiter/work/
+work/
+
+# Local development folder (logs, sim, Quartus temp, reverse engineering)
+_dev/
+
+# Build logs in root
+build_*.log
+fb_output.log
+
+# Template project file (duplicato di Darius2.q*)
+Template.qpf
+Template.qsf
+Template.flow.rpt
+Template.map.rpt
+Template.map.summary
+
+# Tcl/TXT analisi STA temporanei
+_sta_*.tcl
+_sta_*.txt
+sta_*.tcl
+sta_*.rpt
+run_sta.tcl
+read_probe.tcl
+
+# ROM binaries (mai committare)
+*.zip
+*.rom
+jt12.raw
+
+# Temp misc
+cr_ie_info.json
+serv_req_info.txt
+worst_setup.txt
+transcript
