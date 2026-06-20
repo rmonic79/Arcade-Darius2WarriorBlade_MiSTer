@@ -381,16 +381,17 @@ wire [4:0] vol_psg    = osd_psg_vol[0] ? 5'd8 : 5'd1;  // 0=Polite (1/8), 1=MAME
 wire signed [17:0] fm_l_in = $signed({{2{jt10_fm_l[15]}}, jt10_fm_l});
 wire signed [17:0] fm_r_in = $signed({{2{jt10_fm_r[15]}}, jt10_fm_r});
 
-// MAME pancontrol_w (warriorb.cpp:378): gain = data*3/100 (max ~7.65 a data=255).
-// MAME pancontrol_w (ninjaw.cpp:649):  gain = data/255 (max 1.0 a data=255).
-// Per allineare il volume warriorb al triple ninjaw, applico boost ×3 al pan_data
-// in warriorb mode (replica il "data*3" MAME, scalato /256 dallo shift finale).
-// d2d/sagaia (board_warriorb=0): pan_eff = pan_data (max 255 → gain 1.0).
-// warriorb (board_warriorb=1):   pan_eff = pan_data * 3 (max 765 → gain ~3.0, +9.5 dB).
-wire [9:0] pan_eff_0 = board_warriorb ? ({2'd0, pan_data[0]} * 10'd3) : {2'd0, pan_data[0]};
-wire [9:0] pan_eff_1 = board_warriorb ? ({2'd0, pan_data[1]} * 10'd3) : {2'd0, pan_data[1]};
-wire [9:0] pan_eff_2 = board_warriorb ? ({2'd0, pan_data[2]} * 10'd3) : {2'd0, pan_data[2]};
-wire [9:0] pan_eff_3 = board_warriorb ? ({2'd0, pan_data[3]} * 10'd3) : {2'd0, pan_data[3]};
+// MAME pancontrol_w (warriorb.cpp:378): gain = data*3/100; ninjaw.cpp:649: data/255.
+// pan_eff agisce sul blocco FM+ADPCM (musica + effetti del YM2610), NON sul PSG
+// (esplosioni, gestite a parte dal Polite switch — vol_psg, riga ~345).
+// d2d/sagaia: prima era ×1 → musica/ADPCM 9.5 dB sotto warriorb (che ha ×3 +
+// il boost FM globale ×3 = ×9). Pareggiato a ×3 → musica/ADPCM d2d allineata a wb.
+// Le esplosioni PSG NON cambiano (restano sotto il Polite switch).
+// Struttura board_warriorb ? : mantenuta per fine-tuning per board.
+wire [9:0] pan_eff_0 = board_warriorb ? ({2'd0, pan_data[0]} * 10'd3) : ({2'd0, pan_data[0]} * 10'd3);
+wire [9:0] pan_eff_1 = board_warriorb ? ({2'd0, pan_data[1]} * 10'd3) : ({2'd0, pan_data[1]} * 10'd3);
+wire [9:0] pan_eff_2 = board_warriorb ? ({2'd0, pan_data[2]} * 10'd3) : ({2'd0, pan_data[2]} * 10'd3);
+wire [9:0] pan_eff_3 = board_warriorb ? ({2'd0, pan_data[3]} * 10'd3) : ({2'd0, pan_data[3]} * 10'd3);
 
 // Cross-fader TC0060DCA: 4 moltiplicazioni signed_18 * unsigned_10 = signed_28
 wire signed [27:0] fm_l_to_l = fm_l_in * $signed({1'b0, pan_eff_0});

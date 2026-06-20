@@ -364,7 +364,10 @@ wire in_active = in_active_early;
 // Lookahead +1 come Darius 1: BRAM ritorna dato 1 clk dopo → indirizzo del
 // pixel successivo allinea il dato al pixel corrente.
 always @(posedge clk) begin
-	spr_disp_addr <= (render_x < H_ACTIVE - 10'd1) ? render_x + 10'd1 : 10'd1023;
+	// Bordo destro: il clamp a 1023 (cella vuota) cancellava l'ultima colonna
+	// dello sprite. All'ultima colonna leggi l'indirizzo reale invece di 1023,
+	// così la colonna 639 viene mostrata. Vale per entrambi i giochi.
+	spr_disp_addr <= (render_x < H_ACTIVE - 10'd1) ? render_x + 10'd1 : (H_ACTIVE - 10'd1);
 end
 // Display: singolo buffer ping-pong
 always @(*) begin
@@ -754,7 +757,14 @@ always @(posedge clk) begin
                     already_written = lb_buf_sel ? valid_lb1[draw_x[9:0]] : valid_lb0[draw_x[9:0]];
                     current_prio_hi = lb_buf_sel ? prio_lb1 [draw_x[9:0]] : prio_lb0 [draw_x[9:0]];
                     can_write = !already_written || (rd_prio_hi && !current_prio_hi);
-                    if (pixel != 4'd0 && draw_x >= 0 && draw_x < $signed({1'b0, H_ACTIVE}) && can_write) begin
+                    // NIENTE clip draw_x>=0 al bordo sx: il clip tagliava il tile
+                    // sinistro di sprite wide quando a cavallo del bordo (taglio a
+                    // +16 invece di -16, come China Gate). Il line buffer è [0:1023]
+                    // e il display legge solo 0..639, quindi i pixel "fuori" (draw_x
+                    // negativo → draw_x[9:0] in 640..1023, oppure >=640) finiscono in
+                    // celle NON visibili: niente scompare a schermo, niente viene
+                    // tagliato. Pattern China Gate (wrap naturale, no clip esplicito).
+                    if (pixel != 4'd0 && can_write) begin
                         rend_lb_we    <= 1'b1;
                         rend_lb_waddr <= draw_x[9:0];
                         rend_lb_wdata <= {1'b0, 1'b0, rd_prio, rd_color, pixel};

@@ -5,15 +5,11 @@ set_global_assignment -name SYSTEMVERILOG_FILE rtl/darius2/sdram_bridge.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/darius2/pc060ha_link.sv
 # DEPRECATED Darius1: set_global_assignment -name SYSTEMVERILOG_FILE rtl/darius2/darius2_audio_z80.sv
 set_global_assignment -name QIP_FILE rtl/t80/t80.qip
-set_global_assignment -name SYSTEMVERILOG_FILE rtl/darius2/cpu68000_wrapper.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/darius2/cpu68000_fx68k_bridge.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/darius2/darius2_dual68k_top.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/darius2/darius2_cpu_node.sv
-set_global_assignment -name SYSTEMVERILOG_FILE rtl/darius2/darius2_maincpu_map.sv
-set_global_assignment -name SYSTEMVERILOG_FILE rtl/darius2/darius2_subcpu_map.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/darius2/darius2_shared_ram.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/darius2/darius2_local_ram.sv
-set_global_assignment -name SYSTEMVERILOG_FILE rtl/darius2/darius2_fg_renderer.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/darius2/tile_rom_arbiter.sv
 set_global_assignment -name VERILOG_FILE rtl/jtframe/jtframe_tilemap.v
 set_global_assignment -name VERILOG_FILE rtl/jtframe/jtframe_68kdtack_cen.v

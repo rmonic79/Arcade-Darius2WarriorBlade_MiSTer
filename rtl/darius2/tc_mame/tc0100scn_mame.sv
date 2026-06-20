@@ -469,8 +469,14 @@ always @(posedge clk) begin
 			if (subpx == 3'd7) begin
 				if (rpx >= PANEL_W_M1_9) begin
 					rpx <= 0; subpx <= 0;
-					// BG1 rowscroll: stessa formula BG0 con ROWSCROLL_OFFSET parametrico.
-					vram_b_addr <= BG1_RS + (($signed({7'd0, rline}) + ROWSCROLL_OFFSET) & 16'h01ff);
+					// BG1 rowscroll: +1 all'indice (warriorb) per comunicare al
+					// rowscroll la scanline aggiunta dal recupero riga (8c798b0).
+					// Senza, l'indice scanline↔entry è sfasato di 1: la riga di bordo
+					// in alto E la scanline di transizione velocità (muretto nave/
+					// terreno nel parallasse a doppia velocità) pescano l'entry della
+					// fascia sbagliata. darius2d/sagaia invariati.
+					vram_b_addr <= BG1_RS + (($signed({7'd0, rline}) + ROWSCROLL_OFFSET
+					               + (board_warriorb ? 16'sd1 : 16'sd0)) & 16'h01ff);
 					st <= S_B1_RS0;
 				end else
 					st <= S_B0_AT0;
@@ -553,7 +559,11 @@ always @(posedge clk) begin
 			if (subpx == 3'd7) begin
 				if (rpx >= PANEL_W_M1_9) begin
 					rpx <= 0; subpx <= 0;
-					line_sy <= $signed({7'd0, rline}) + fg0_sy - SCROLLDY + $signed({6'd0, fg0_yoff_ext});
+					// FG text Y: warriorb mostra 1 scanline del tile adiacente
+					// (puntini sopra E sotto i glifi, assenti in MAME) → off-by-one
+					// sul FG. -1 solo warriorb allinea py/tr. darius2d/sagaia: FG ok.
+					line_sy <= $signed({7'd0, rline}) + fg0_sy - SCROLLDY + $signed({6'd0, fg0_yoff_ext})
+					           + (board_warriorb ? 16'sd1 : 16'sd0);
 					st <= S_FG_AT0;
 				end else
 					st <= S_B1_CS0;  // colscroll next tile

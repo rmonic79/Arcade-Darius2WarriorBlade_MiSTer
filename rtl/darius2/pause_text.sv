@@ -46,7 +46,7 @@ module pause_text #(
 	parameter        SCROLL_EN    = 0,            // 0=statico, 1=scroll verticale
 	parameter        SCROLL_PERIOD = 3,           // 1 pixel ogni N frame (se SCROLL_EN=1)
 	parameter        FONT_FILE    = "logo/font_darius.hex",
-	parameter        MSG_FILE     = "logo/links.mem"
+	parameter        MSG_FILE     = "logo/patrons.mem"
 ) (
 	input  wire        clk,
 	input  wire        active,        // overlay attivo (pause & ~clean)

@@ -19,14 +19,12 @@
     Date: 2026
 */
 
-// pause_overlay.sv — overlay pausa: dim + logo + header "PATREON" +
-// patron list scrollante (sx) + links statici (dx).
+// pause_overlay.sv — overlay pausa: dim + logo + header + patron list scrollante.
 //
-// Layout 864×224:
-//   - Header "PATREON" giallo top-sx (X≈16, Y≈8)
-//   - Patron scroll bottom→top, sx del logo (X=16..344, Y=40..184)
-//   - Logo 48×48 ×3 = 144×144 al centro (X=360..504, Y=40..184)
-//   - Links statici a destra (X=520..848, Y=40..184)
+// Layout 640×224 (2 schermi × 320):
+//   - Monitor SX (X=0..319):  header "SUPPORTERS" + patron scroll (link in coda
+//                             al file patrons.mem, stile core a 1 schermo)
+//   - Monitor DX (X=320..639): logo 48×48 ×3 = 144×144 centrato
 
 module pause_overlay (
 	input  wire        clk,
@@ -57,9 +55,9 @@ wire vblank_pulse = (render_y == 9'd240) && (render_y_d == 9'd239);
 
 // =====================================================================
 // Logo placement: 48x48 sorgente, scalato x3 → 144x144 sullo schermo.
-// Schermo 864x224, top-left logo a ((864-144)/2, (224-144)/2) = (360, 40).
+// Monitor DX (X=320..639): centrato → X = 320 + (320-144)/2 = 408. Y = 40.
 // =====================================================================
-localparam [9:0] LOGO_X    = 10'd360;
+localparam [9:0] LOGO_X    = 10'd408;
 localparam [8:0] LOGO_Y    = 9'd40;
 localparam [9:0] LOGO_XEND = LOGO_X + 10'd144;
 localparam [8:0] LOGO_YEND = LOGO_Y + 9'd144;
@@ -117,7 +115,7 @@ wire logo_opaque = 1'b1;  // Logo tutto opaco (nero=palette[0] visibile come bor
 
 // =====================================================================
 // Header "SUPPORTERS" — centrato nel monitor sx (sopra patron scroll).
-// 10 char × 8 = 80 px → ORIGIN_X = 0 + (288-80)/2 = 104
+// 10 char × 8 = 80 px → ORIGIN_X = 0 + (320-80)/2 = 120
 // =====================================================================
 wire       header_on;
 wire [1:0] header_tier;
@@ -125,7 +123,7 @@ pause_text #(
 	.W_CHARS      (10),
 	.H_CHARS      (1),
 	.MSG_ROWS     (1),
-	.ORIGIN_X     (10'd104),
+	.ORIGIN_X     (10'd120),
 	.ORIGIN_Y     (9'd24),
 	.SCROLL_EN    (0),
 	.FONT_FILE    ("logo/font_darius.hex"),
@@ -141,17 +139,18 @@ pause_text #(
 );
 
 // =====================================================================
-// Patron scroll — centrati nel monitor sx (X=0..288, 288 px).
-// 30 char × 8 = 240 px → ORIGIN_X = 0 + (288-240)/2 = 24
-// Y=40..184 (18 righe), MSG_ROWS=32 (scroll loop)
+// Patron scroll — centrati nel monitor sx (X=0..319, 320 px).
+// 30 char × 8 = 240 px → ORIGIN_X = 0 + (320-240)/2 = 40
+// Y=48..192 (18 righe visibili), MSG_ROWS=85 (67 righe testo+link in coda al
+// file patrons.mem + 18 righe vuote di stacco divisorio prima del re-loop)
 // =====================================================================
 wire       patron_on;
 wire [1:0] patron_tier;
 pause_text #(
 	.W_CHARS       (30),
 	.H_CHARS       (18),
-	.MSG_ROWS      (45),
-	.ORIGIN_X      (10'd24),
+	.MSG_ROWS      (85),
+	.ORIGIN_X      (10'd40),
 	.ORIGIN_Y      (9'd48),
 	.SCROLL_EN     (1),
 	.SCROLL_PERIOD (3),
@@ -167,31 +166,8 @@ pause_text #(
 	.pixel_tier   (patron_tier)
 );
 
-// =====================================================================
-// Links statici — centrati nel monitor dx (X=576..864, 288 px).
-// 32 char × 8 = 256 px → ORIGIN_X = 576 + (288-256)/2 = 592
-// 17 righe × 8 = 136 px, da Y=16
-// =====================================================================
-wire       links_on;
-wire [1:0] links_tier;  // unused, links sempre cyan (uniformi)
-pause_text #(
-	.W_CHARS      (32),
-	.H_CHARS      (17),
-	.MSG_ROWS     (17),
-	.ORIGIN_X     (10'd592),
-	.ORIGIN_Y     (9'd24),
-	.SCROLL_EN    (0),
-	.FONT_FILE    ("logo/font_darius.hex"),
-	.MSG_FILE     ("logo/links.mem")
-) u_links (
-	.clk          (clk),
-	.active       (overlay_on),
-	.vblank_pulse (vblank_pulse),
-	.render_x     (render_x),
-	.render_y     (render_y),
-	.pixel_on     (links_on),
-	.pixel_tier   (links_tier)
-);
+// Links: rimossi come istanza separata (layout a 2 schermi). I link ora vivono
+// in coda al file patrons.mem e scrollano con la lista (stile core a 1 schermo).
 
 // Palette tier per i patron (4 livelli):
 //   tier 0 = bianco  (default, nessun tier)
@@ -212,16 +188,13 @@ endfunction
 
 // Colori testi:
 //   header   = giallo/oro (FFD700) — stile Taito
-//   patron   = colore tier (palette sopra)
-//   links    = colore tier (label azzurrino, URL bianco)
+//   patron   = colore tier (palette sopra; link in coda al file usano i tier)
 wire [23:0] header_rgb = 24'hFFD700;
 wire [23:0] patron_rgb = tier_color(patron_tier);
-wire [23:0] links_rgb  = tier_color(links_tier);
 
-// Priorità mux: logo > header > patron > links > dim > raw
-wire text_on = header_on | patron_on | links_on;
+// Priorità mux: logo > header > patron > dim > raw
+wire text_on = header_on | patron_on;
 wire [23:0] text_rgb = header_on ? header_rgb :
-                       links_on  ? links_rgb  :
                                    patron_rgb;
 
 // =====================================================================

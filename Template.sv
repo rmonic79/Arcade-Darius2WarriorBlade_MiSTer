@@ -165,14 +165,14 @@ wire [1:0] ar = status[122:121];
 
 // OSD layer offsets: 6-bit signed 2's complement, default 0 on reset
 // Hardcoded baseline per warriorb (sommata all'OSD): BG0 X = -15
-wire signed [9:0] osd_l0_xoff  = {{4{status[43]}}, status[43:38]} + (status[21] ? -10'sd18 : -10'sd18);
-wire signed [9:0] osd_l0_yoff  = {{4{status[49]}}, status[49:44]} + (status[21] ? -10'sd7 : 10'sd0);
-wire signed [9:0] osd_l1_xoff  = {{4{status[55]}}, status[55:50]} + (status[21] ? -10'sd18 : -10'sd18);
-wire signed [9:0] osd_l1_yoff  = {{4{status[61]}}, status[61:56]} + (status[21] ? -10'sd7 : 10'sd0);
+wire signed [9:0] osd_l0_xoff  = {{4{status[43]}}, status[43:38]} + (board_warriorb ? -10'sd18 : -10'sd18);
+wire signed [9:0] osd_l0_yoff  = {{4{status[49]}}, status[49:44]} + (board_warriorb ? -10'sd8 : 10'sd0);
+wire signed [9:0] osd_l1_xoff  = {{4{status[55]}}, status[55:50]} + (board_warriorb ? -10'sd18 : -10'sd18);
+wire signed [9:0] osd_l1_yoff  = {{4{status[61]}}, status[61:56]} + (board_warriorb ? -10'sd8 : 10'sd0);
 wire signed [9:0] osd_spr_xoff = {{4{status[67]}}, status[67:62]};
-wire signed [9:0] osd_spr_yoff = {{4{status[73]}}, status[73:68]} + (status[21] ? -10'sd7 : -10'sd15);
-wire signed [9:0] osd_fg_xoff  = {{4{status[79]}}, status[79:74]} + (status[21] ? -10'sd18 : -10'sd18);
-wire signed [9:0] osd_fg_yoff  = {{4{status[85]}}, status[85:80]} + (status[21] ? -10'sd8 : 10'sd0);
+wire signed [9:0] osd_spr_yoff = {{4{status[73]}}, status[73:68]} + (board_warriorb ? -10'sd6 : -10'sd15);
+wire signed [9:0] osd_fg_xoff  = {{4{status[79]}}, status[79:74]} + (board_warriorb ? -10'sd18 : -10'sd18);
+wire signed [9:0] osd_fg_yoff  = {{4{status[85]}}, status[85:80]} + (board_warriorb ? -10'sd9 : 10'sd0);
 
 `include "build_id.v"
 localparam CONF_STR = {
@@ -182,28 +182,13 @@ localparam CONF_STR = {
 	"P1O[122:121],Aspect ratio,Original,Full Screen,[ARC1],[ARC2];",
 	"P1O[6:5],Scale,Narrower HV-Integer,V-Integer,HV-Integer;",
 	"-;",
-	"O[17],Pause,Off,On;",
-	"O[18],Debug Overlay,On,Off;",
 	"O[19],Clean Pause,Off,On;",
-	"O[21],Board,Darius2d,Warriorb;",
 	"-;",
-	"O[30],Layer BG0,On,Off;",
-	"O[31],Layer BG1,On,Off;",
-	"O[32],Sprite,On,Off;",
-	"O[33],Layer FG0,On,Off;",
-	"-;",
-	"O[25:23],Main CPU,12MHz,16MHz,24MHz,32MHz,48MHz,8MHz;",
-	"O[28:26],Sub CPU,12MHz,16MHz,24MHz,32MHz,48MHz,8MHz;",
-	"-;",
-	"P2,Layer Offsets;",
-	"P2O[43:38],BG0 X offset,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,+16,+17,+18,+19,+20,+21,+22,+23,+24,+25,+26,+27,+28,+29,+30,+31,-32,-31,-30,-29,-28,-27,-26,-25,-24,-23,-22,-21,-20,-19,-18,-17,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
-	"P2O[49:44],BG0 Y offset,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,+16,+17,+18,+19,+20,+21,+22,+23,+24,+25,+26,+27,+28,+29,+30,+31,-32,-31,-30,-29,-28,-27,-26,-25,-24,-23,-22,-21,-20,-19,-18,-17,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
-	"P2O[55:50],BG1 X offset,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,+16,+17,+18,+19,+20,+21,+22,+23,+24,+25,+26,+27,+28,+29,+30,+31,-32,-31,-30,-29,-28,-27,-26,-25,-24,-23,-22,-21,-20,-19,-18,-17,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
-	"P2O[61:56],BG1 Y offset,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,+16,+17,+18,+19,+20,+21,+22,+23,+24,+25,+26,+27,+28,+29,+30,+31,-32,-31,-30,-29,-28,-27,-26,-25,-24,-23,-22,-21,-20,-19,-18,-17,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
-	"P2O[67:62],Sprite X offset,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,+16,+17,+18,+19,+20,+21,+22,+23,+24,+25,+26,+27,+28,+29,+30,+31,-32,-31,-30,-29,-28,-27,-26,-25,-24,-23,-22,-21,-20,-19,-18,-17,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
-	"P2O[73:68],Sprite Y offset,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,+16,+17,+18,+19,+20,+21,+22,+23,+24,+25,+26,+27,+28,+29,+30,+31,-32,-31,-30,-29,-28,-27,-26,-25,-24,-23,-22,-21,-20,-19,-18,-17,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
-	"P2O[79:74],FG X offset,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,+16,+17,+18,+19,+20,+21,+22,+23,+24,+25,+26,+27,+28,+29,+30,+31,-32,-31,-30,-29,-28,-27,-26,-25,-24,-23,-22,-21,-20,-19,-18,-17,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
-	"P2O[85:80],FG Y offset,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,+16,+17,+18,+19,+20,+21,+22,+23,+24,+25,+26,+27,+28,+29,+30,+31,-32,-31,-30,-29,-28,-27,-26,-25,-24,-23,-22,-21,-20,-19,-18,-17,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
+	"P2,Debug;",
+	"P2O[30],Layer BG0,On,Off;",
+	"P2O[31],Layer BG1,On,Off;",
+	"P2O[32],Sprite,On,Off;",
+	"P2O[33],Layer FG0,On,Off;",
 	"-;",
 	"P3,Audio Mixer;",
 	"P3O[88:86],FM volume,100%,12%,25%,50%,75%,150%,200%,Mute;",
@@ -282,6 +267,18 @@ reg [15:0] dip_sw = 16'hFFFF;
 always @(posedge clk_sys)
 	if (ioctl_wr && (ioctl_index == 16'd254) && !ioctl_addr[26:1])
 		dip_sw <= ioctl_dout;
+
+// Board select — via MRA region index=1 (mod byte), NON dai DIP.
+// CRITICO: index=1 viene scaricato dall'HPS PRIMA dei ROM (index=0), mentre i
+// DIP (index=254) arrivano DOPO. board_warriorb deve essere valido DURANTE il
+// download perché il bridge calcola gli indirizzi SDRAM/DDR3 (SPRITE_BASE,
+// TILE_BASE, sprite_dl_lo) in base ad esso. Default 0 = darius2d/sagaia
+// (default "00" o region assente); Warrior Blade MRA carica "01".
+// NON resettato dal game reset (latch solo su ioctl_wr) → robusto ai soft-reset.
+reg board_warriorb = 1'b0;
+always @(posedge clk_sys)
+	if (ioctl_wr && (ioctl_index == 16'd1))
+		board_warriorb <= ioctl_dout[0];
 
 ///////////////////////   CLOCKS   ///////////////////////////////
 
@@ -408,8 +405,8 @@ sdram_bridge bridge
 	.reset(bridge_reset),
 	.sdram_ready(sdram_ready),
 
-	// Board variant (runtime, OSD status[21]): 0=darius2d, 1=warriorb
-	.board_warriorb(status[21]),
+	// Board variant: 0=darius2d, 1=warriorb (da DIP byte 3 via MRA, vedi board_warriorb)
+	.board_warriorb(board_warriorb),
 
 	// HPS download
 	.ioctl_download(ioctl_download),
@@ -491,24 +488,15 @@ darius2_dual68k_top game
 	.clk(clk_sys),
 	.reset(reset),
 	.pause(pause),
-	// Board variant: 0=darius2d/sagaia map, 1=warriorb map (OSD status[21])
-	.board_warriorb(status[21]),
-	// Force 12 MHz (Darius 2 original MAME rate). OSD status ignored.
-	// OSD main CPU speed: status[25:23]
-	//   000=12MHz  001=16MHz  010=24MHz  011=32MHz  100=48MHz  101=8MHz (arcade)
-	// clk_sel code (top case): 0=12MHz, 1=8MHz, 2=16MHz, 3=24MHz, 4=32MHz, 5=48MHz
-	.clk_sel(status[25:23] == 3'd0 ? 3'd0 :   // 12 MHz (default)
-	         status[25:23] == 3'd1 ? 3'd2 :   // 16 MHz
-	         status[25:23] == 3'd2 ? 3'd3 :   // 24 MHz
-	         status[25:23] == 3'd3 ? 3'd4 :   // 32 MHz
-	         status[25:23] == 3'd4 ? 3'd5 :   // 48 MHz
-	                                 3'd1),   // 8 MHz (arcade originale)
-	.sub_clk_sel(status[28:26] == 3'd0 ? 3'd0 :
-	             status[28:26] == 3'd1 ? 3'd2 :
-	             status[28:26] == 3'd2 ? 3'd3 :
-	             status[28:26] == 3'd3 ? 3'd4 :
-	             status[28:26] == 3'd4 ? 3'd5 :
-	                                     3'd1),
+	// Board variant: 0=darius2d/sagaia map, 1=warriorb map (da DIP byte 3 via MRA)
+	.board_warriorb(board_warriorb),
+	// CPU clock parametrizzato per board (MAME-accurate), niente OSD:
+	//   darius2d/sagaia : 68000 @ 12 MHz (XTAL 24MHz/2)  → clk_sel code 0
+	//   warriorb        : 68000 @ 16 MHz (warriorb.cpp)  → clk_sel code 2
+	// clk_sel code (divisore in darius2_dual68k_top): 0=12MHz, 2=16MHz.
+	.clk_sel(board_warriorb ? 3'd2 : 3'd0),
+	// Sub-CPU non esiste in warriorb.cpp (single 68000): allineato per coerenza.
+	.sub_clk_sel(board_warriorb ? 3'd2 : 3'd0),
 	.z80_clk_sel(status[37:36]), // OSD: Z80 audio speed
 	.p1_input(p1_input),
 	.p2_input(p2_input),
@@ -657,7 +645,7 @@ wire [7:0] video_r, video_g, video_b;
 triple_screen_test #(.ENABLE_DEBUG(0)) u_video (
 	.clk(clk_sys),
 	.reset(video_reset),
-	.board_warriorb(status[21]),
+	.board_warriorb(board_warriorb),
 	// Sprite passa via OB → palette bypass (sprite_ob gate dentro top).
 	// Path esterno sprite_rgb DISATTIVATO (pal_data=0 darebbe sprite neri).
 	.layer_en({1'b1, 1'b0, 1'b1, 1'b1}),  // {FG, SPR=off path esterno, L1, L0}
@@ -786,9 +774,9 @@ pause_overlay u_pause_ovl (
 	.rgb_b_out (VGA_B)
 );
 
-// Aspect ratio: Original = 4:1 (3x 4:3 monitors), Full Screen = 0:0
-wire [11:0] arx = (!ar) ? 12'd4 : (ar - 1'd1);
-wire [11:0] ary = (!ar) ? 12'd1 : 12'd0;
+// Aspect ratio: Original = 8:3 (2x 4:3 monitors, warriorb 2-screen), Full Screen = 0:0
+wire [11:0] arx = (!ar) ? 12'd8 : (ar - 1'd1);
+wire [11:0] ary = (!ar) ? 12'd3 : 12'd0;
 
 // Integer scaling (Scale menu: Narrower HV-Integer / V-Integer / HV-Integer)
 // Tolto "Normal" per replicare Darius triple, default = prima opzione (status=00).
